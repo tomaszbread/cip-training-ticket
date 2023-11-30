@@ -1,13 +1,19 @@
 
 import { createClient } from 'redis';
 
+class RedisConfig {
+    public redisClient: any
+    constructor() { }
 
-const client = createClient();
+    async initConfig() {
+        this.redisClient = createClient();
+        this.redisClient.on('error', (err: Error) => console.log('Redis Client Error', err));
+        await this.redisClient.connect();
+        this.redisClient.on('error',  (err: Error) => console.log('Redis Client Error', err));
+    }
 
-client.on('error', err => console.log('Redis Client Error', err));
+}
 
-await client.connect();
 
-client.on('error', err => console.log('Redis Client Error', err));
 
-export default client;
+export default RedisConfig;
