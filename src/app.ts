@@ -6,20 +6,20 @@ import RedisStreamSubscriber from './client/redisStreamSubscriber';
 class App {
   private readonly app: express.Application;
   private readonly port: number;
-  private readonly redisStreamSubscriber = new RedisStreamSubscriber();
+  //private readonly redisStreamSubscriber = new RedisStreamSubscriber();
   private streamKey = 'location-alert-stream';
   constructor() {
     this.app = express();
     this.port = 3000;
 
-    this.configureMiddleware();
+    this.configureServer();
     this.configureRoutes();
     this.startServer();
     this.initializeElasticsearch();
-    this.locationAlertStreamSubscriber()
+   // this.locationAlertStreamSubscriber()
   }
 
-  private configureMiddleware(): void {
+  private configureServer(): void {
     this.app.use(express.json());
   }
 
@@ -36,18 +36,18 @@ class App {
   private async initializeElasticsearch(): Promise<void> {
     const elasticConfig = ElasticConfig.getInstance();
     try {
-      await elasticConfig.createBaseIndex('your_index_name');
+      await elasticConfig.createBaseIndex('location-alert');
     } catch (error) {
       console.error('Error in main application:', error);
     }
   }
 
-  private locationAlertStreamSubscriber(){
-    this.redisStreamSubscriber.subscribeToStream(this.streamKey, (locationAlert) => {
-      // Do something with the received message
-      console.log(locationAlert)
-    });
-  }
+  // private locationAlertStreamSubscriber(){
+  //   this.redisStreamSubscriber.subscribeToStream(this.streamKey, (locationAlert) => {
+  //     // Do something with the received message
+  //     console.log(locationAlert)
+  //   });
+  // }
 
 }
 

@@ -17,7 +17,8 @@ class LocationAlertController {
       {
         id: '1',
         userId: 'admin',
-        location: { latitude: 40.7128, longitude: -74.0060 },
+        latitude: 40.7128, 
+        longitude: -74.0060 ,
         message: 'local admin',
         timestamp: new Date(),
       } as LocationAlert,

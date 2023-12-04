@@ -11,6 +11,13 @@ class LocationAlertService {
         return Math.random().toString(36).substring(7);
     }
 
+    generateRandomLatitude(): number {
+        return Math.random() * 180 - 90;
+    }
+    generateRandomLongitude(): number {
+        return Math.random() * 360 - 180;
+    }
+
     generateRandomLocation(): { latitude: number; longitude: number; } {
         return {
             latitude: Math.random() * 180 - 90,
@@ -27,7 +34,8 @@ class LocationAlertService {
         return {
             id: this.generateUniqueId(),
             userId: this.generateRandomUserId(),
-            location: this.generateRandomLocation(),
+            latitude: this.generateRandomLatitude(),
+            longitude: this.generateRandomLongitude(),
             message: this.generateRandomMessage(),
             timestamp: new Date()
         };

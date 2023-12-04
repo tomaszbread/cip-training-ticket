@@ -1,4 +1,6 @@
 import { Client } from '@elastic/elasticsearch';
+import { locationAlertMapping } from '../models/locationAlert';
+
 
 class ElasticConfig {
   private static _instance: ElasticConfig;
@@ -25,15 +27,17 @@ class ElasticConfig {
       await this.client.indices.create({
         index: indexName,
         body: {
-          mappings: {
-            properties: {            
-              field1: { type: 'text' },
-              field2: { type: 'keyword' },
-            },
-          },
-        },
+          mappings: locationAlertMapping
+        }
       });
-      console.log(`Index '${indexName}' created successfully.`);
+      // const indexExists = await this.client.indices.exists({
+      //   index: indexName,
+      // });
+      // if (!indexExists) {
+ 
+      //   console.log(`Index '${indexName}' created successfully.`);
+      // }
+
     } catch (error) {
       console.error(`Error creating index '${indexName}':`, error);
       throw error;

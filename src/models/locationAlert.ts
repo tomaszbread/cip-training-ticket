@@ -1,12 +1,23 @@
+import { MappingTypeMapping } from "@elastic/elasticsearch/lib/api/types";
+
 interface LocationAlert {
     id: string;
     userId: string;
-    location: {
-        latitude: number;
-        longitude: number;
-    };
+    latitude: number;
+    longitude: number;
     message: string;
     timestamp: Date;
 }
+
+export const locationAlertMapping: MappingTypeMapping = {
+    properties: {
+        id: { type: "text" },
+        userId: { type: "text" },
+        timestamp: { type: "long" },
+        message: { type: "text" },
+        latitude: { type: "long" },
+        longitude: { type: "long" },
+    }
+};
 
 export default LocationAlert;
