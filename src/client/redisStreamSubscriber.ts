@@ -1,16 +1,18 @@
-import IORedis from 'ioredis';
+import Redis from "ioredis";
+import RedisConfig from "../config/redisConfig";
+
 
 class RedisStreamSubscriber {
-  private redisSubscriber: IORedis;
 
+  private redisConfig: RedisConfig;
   constructor() {
-    this.redisSubscriber = new IORedis();
+    this.redisConfig = new RedisConfig();
   }
 
   public async subscribeToStream(streamKey: string, callback: (message: any) => void): Promise<void> {
-    await this.redisSubscriber.subscribe(streamKey);
+    await this.redisConfig.redisClient.subscribe(streamKey);
 
-    this.redisSubscriber.on('message', (channel, message) => {
+    this.redisConfig.redisClient.on('message', (channel: any, message: any) => {
       if (channel === streamKey) {
         const parsedMessage = JSON.parse(message);
         callback(parsedMessage);

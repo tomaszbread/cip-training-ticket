@@ -24,19 +24,19 @@ class ElasticConfig {
 
   public async createBaseIndex(indexName: string): Promise<void> {
     try {
-      await this.client.indices.create({
+
+      const indexExists = await this.client.indices.exists({
         index: indexName,
-        body: {
-          mappings: locationAlertMapping
-        }
       });
-      // const indexExists = await this.client.indices.exists({
-      //   index: indexName,
-      // });
-      // if (!indexExists) {
- 
-      //   console.log(`Index '${indexName}' created successfully.`);
-      // }
+      if (!indexExists) {
+        await this.client.indices.create({
+          index: indexName,
+          body: {
+            mappings: locationAlertMapping
+          }
+        });
+        console.log(`Index '${indexName}' created successfully.`);
+      }
 
     } catch (error) {
       console.error(`Error creating index '${indexName}':`, error);

@@ -2,21 +2,25 @@ import express from 'express';
 import LocationAlertRoutes from './routes/locationAlertRoutes';
 import ElasticConfig from './config/elasticConfig';
 import RedisStreamSubscriber from './client/redisStreamSubscriber';
+import RedisConfig from './config/redisConfig';
 
 class App {
   private readonly app: express.Application;
   private readonly port: number;
-  //private readonly redisStreamSubscriber = new RedisStreamSubscriber();
+  private readonly redisStreamSubscriber = new RedisStreamSubscriber();
+  private redisConfig: RedisConfig;
   private streamKey = 'location-alert-stream';
   constructor() {
     this.app = express();
     this.port = 3000;
+    this.redisConfig = new RedisConfig();
 
+    this.redisConfig.initConfig();
     this.configureServer();
     this.configureRoutes();
     this.startServer();
     this.initializeElasticsearch();
-   // this.locationAlertStreamSubscriber()
+    this.locationAlertStreamSubscriber();
   }
 
   private configureServer(): void {
@@ -42,12 +46,12 @@ class App {
     }
   }
 
-  // private locationAlertStreamSubscriber(){
-  //   this.redisStreamSubscriber.subscribeToStream(this.streamKey, (locationAlert) => {
-  //     // Do something with the received message
-  //     console.log(locationAlert)
-  //   });
-  // }
+  private locationAlertStreamSubscriber() {
+    this.redisStreamSubscriber.subscribeToStream(this.streamKey, (locationAlert) => {
+      // Do something with the received message
+      console.log(locationAlert);
+    });
+  }
 
 }
 

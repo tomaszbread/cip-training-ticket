@@ -1,15 +1,15 @@
 
-import { createClient } from 'redis';
+import Redis from 'ioredis';
+
 
 class RedisConfig {
-    public redisClient: any
+    public redisClient: any;
     constructor() { }
 
     async initConfig() {
-        this.redisClient = createClient();
+        this.redisClient = new Redis();
+        console.log(this.redisClient.status);
         this.redisClient.on('error', (err: Error) => console.log('Redis Client Error', err));
-        await this.redisClient.connect();
-        this.redisClient.on('error',  (err: Error) => console.log('Redis Client Error', err));
     }
 
 }
