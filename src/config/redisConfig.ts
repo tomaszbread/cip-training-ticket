@@ -3,13 +3,13 @@ import Redis from 'ioredis';
 
 
 class RedisConfig {
-    public redisClient: any;
+    public client: Redis = new Redis();
     constructor() { }
 
     async initConfig() {
-        this.redisClient = new Redis();
-        console.log(this.redisClient.status);
-        this.redisClient.on('error', (err: Error) => console.log('Redis Client Error', err));
+        this.client = new Redis();
+        console.log(this.client.status);
+        this.client.on('error', (err: Error) => console.log('Redis Client Error', err));
     }
 
 }

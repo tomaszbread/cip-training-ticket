@@ -4,19 +4,27 @@ import RedisConfig from "../config/redisConfig";
 
 class RedisStreamSubscriber {
 
-  private redisConfig: RedisConfig;
+  private redis: RedisConfig;
   constructor() {
-    this.redisConfig = new RedisConfig();
+    this.redis = new RedisConfig();
   }
 
-  public async subscribeToStream(streamKey: string, callback: (message: any) => void): Promise<void> {
-    await this.redisConfig.redisClient.subscribe(streamKey);
-
-    this.redisConfig.redisClient.on('message', (channel: any, message: any) => {
-      if (channel === streamKey) {
-        const parsedMessage = JSON.parse(message);
-        callback(parsedMessage);
+ public  subscribeToStream(streamName: string, callback: any) {
+    this.redis.client.xread('BLOCK', 0, 'STREAMS', streamName, '0', (err, streams: any) => {
+      if (err) {
+        console.error('Error reading stream:', err);
+        return;
       }
+      callback(streams);
+      // for (const [stream, messages] of streams) {
+      //   for (const message of messages) {
+      //     const [messageId, messageData] = message;
+      //     const alert = JSON.parse(messageData.data);
+   
+      //   }
+      // }
+
+      // this.subscribeToStream(streamName, callback);
     });
   }
 }
