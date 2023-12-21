@@ -1,5 +1,6 @@
 import Redis from "ioredis";
 import RedisConfig from "../config/redisConfig";
+import LocationAlert from "../models/locationAlert";
 
 
 class RedisStreamSubscriber {
@@ -9,24 +10,47 @@ class RedisStreamSubscriber {
     this.redis = new RedisConfig();
   }
 
- public  subscribeToStream(streamName: string, callback: any) {
-    this.redis.client.xread('BLOCK', 0, 'STREAMS', streamName, '0', (err, streams: any) => {
-      if (err) {
-        console.error('Error reading stream:', err);
-        return;
-      }
-      callback(streams);
-      // for (const [stream, messages] of streams) {
-      //   for (const message of messages) {
-      //     const [messageId, messageData] = message;
-      //     const alert = JSON.parse(messageData.data);
-   
-      //   }
-      // }
+  public async subscribeToStream(streamKey: string, callback: any) {
+    const result = await this.redis.client.xread('BLOCK', 1000, 'STREAMS', streamKey, '0');
+    if (result) {
+      const stream = result[0];
+      const messages = stream[1];
 
-      // this.subscribeToStream(streamName, callback);
-    });
+      for (const [messageId, messageData] of messages) {
+        const decodedMessage = this.decodeMessageData(messageData);
+
+        console.log(`Received message with ID ${messageId}:`, decodedMessage);
+
+        callback(decodedMessage);
+      }
+    }
   }
+
+
+  private decodeMessageData(messageData: string[]): LocationAlert {
+    const decodedMessage: any = {} as LocationAlert;
+
+    for (let i = 0; i < messageData.length; i += 2) {
+      const key = messageData[i].toString()
+      const value = messageData[i + 1].toString();
+
+      // Convert specific fields back to their original types
+      if (key === 'latitude' || key === 'longitude') {
+        decodedMessage[key] = parseFloat(value);
+      } else if (key === 'timestamp') {
+        decodedMessage[key] = new Date(value);
+      } else {
+        decodedMessage[key] = value;
+      }
+    }
+
+    return decodedMessage;
+  }
+
+
 }
+
+
+
 
 export default RedisStreamSubscriber;
