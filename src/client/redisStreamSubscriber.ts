@@ -33,8 +33,6 @@ class RedisStreamSubscriber {
     for (let i = 0; i < messageData.length; i += 2) {
       const key = messageData[i].toString()
       const value = messageData[i + 1].toString();
-
-      // Convert specific fields back to their original types
       if (key === 'latitude' || key === 'longitude') {
         decodedMessage[key] = parseFloat(value);
       } else if (key === 'timestamp') {
@@ -43,7 +41,6 @@ class RedisStreamSubscriber {
         decodedMessage[key] = value;
       }
     }
-
     return decodedMessage;
   }
 
