@@ -35,8 +35,6 @@ class RedisStreamSubscriber {
       const value = messageData[i + 1].toString();
       if (key === 'latitude' || key === 'longitude') {
         decodedMessage[key] = parseFloat(value);
-      } else if (key === 'timestamp') {
-        decodedMessage[key] = new Date(value);
       } else {
         decodedMessage[key] = value;
       }

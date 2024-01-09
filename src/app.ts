@@ -3,39 +3,65 @@ import LocationAlertRoutes from './routes/locationAlertRoutes';
 import ElasticConfig from './config/elasticConfig';
 import RedisStreamSubscriber from './subscribers/redisStreamSubscriber';
 import RedisConfig from './config/redisConfig';
+import SocketConfig from './config/socketConfig';
 import LocationAlertController from './controllers/locationAlertController';
 import LocationAlertService from './services/locationAlertService';
+import * as path from 'path';
 
 class App {
   private readonly app: express.Application;
-  private readonly port: number;
-  private readonly redisStreamSubscriber = new RedisStreamSubscriber();
-  private locationAlertService: LocationAlertService;
+  private readonly port: number = 3000;
+
   private redisConfig: RedisConfig;
+  private socketConfig: SocketConfig
   private elasticConfig: ElasticConfig;
+
+  private redisStreamSubscriber: RedisStreamSubscriber;
+  private locationAlertService: LocationAlertService;
   private locationAlertController: LocationAlertController;
 
   private streamKey = 'location-alert-stream';
   private indexName = 'location-alert';
 
+
+
   constructor() {
     this.app = express();
-    this.port = 3000;
+    this.socketConfig = new SocketConfig(this.app)
     this.redisConfig = new RedisConfig();
+    this.redisStreamSubscriber = new RedisStreamSubscriber();
     this.locationAlertController = new LocationAlertController();
     this.locationAlertService = new LocationAlertService();
     this.elasticConfig = new ElasticConfig();
-    this.redisConfig.initConfig();
+    this.onInit();
+  }
+
+  private async onInit() {
+    this.configureRedis();
     this.configureServer();
+    this.configureStaticFiles();
     this.configureRoutes();
     this.startServer();
-    this.initializeElasticsearch();
-    this.locationAlertController.createLocationAlert();
-    this.locationAlertStreamSubscriber();
+    await this.initializeElasticSearch();
+    this.createLocationAlert();
+    await this.locationAlertStreamSubscriber();
   }
 
   private configureServer(): void {
     this.app.use(express.json());
+
+
+  }
+  private configureStaticFiles(): void {
+
+    this.app.get('/', (req, res) => {
+      const indexPath = path.join(__dirname, '/public/index.html');
+      res.sendFile(indexPath);
+    });
+  }
+  
+  private configureRedis(){
+    this.redisConfig.initConfig();
   }
 
   private configureRoutes(): void {
@@ -43,12 +69,11 @@ class App {
   }
 
   private startServer(): void {
-    this.app.listen(this.port, () => {
-      console.log(`Server is running on port ${this.port}`);
-    });
+    this.socketConfig.startServer(this.port);
+
   }
 
-  private async initializeElasticsearch(): Promise<void> {
+  private async initializeElasticSearch(): Promise<void> {
     try {
       await this.elasticConfig.createBaseIndex(this.indexName);
     } catch (error) {
@@ -56,10 +81,16 @@ class App {
     }
   }
 
-  private locationAlertStreamSubscriber() {
-    this.redisStreamSubscriber.subscribeToStream(this.streamKey, (locationAlert: any) => {
+  private createLocationAlert(){
+    this.locationAlertController.createLocationAlert();
+  }
+
+  private async locationAlertStreamSubscriber() {
+    this.redisStreamSubscriber.subscribeToStream(this.streamKey, async (locationAlert: any) => {
       console.log('received message', locationAlert);
       this.locationAlertService.saveLocationAlertToElasticSearch(locationAlert);
+      const updatedData = await this.locationAlertService.fetchLocationAlertData();
+      this.socketConfig.io.emit('elasticsearch-data', updatedData);
     });
   }
 

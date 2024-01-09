@@ -1,13 +1,16 @@
 
+import { Client } from '@elastic/elasticsearch';
 import ElasticConfig from '../config/elasticConfig';
 import LocationAlert from '../models/locationAlert';
 
 class LocationAlertService {
-    private elasticConfig: ElasticConfig;
-
+    private elasticConfig: ElasticConfig
+    public elasticClient: Client
     private indexName = 'location-alert';
+
     constructor() {
         this.elasticConfig = new ElasticConfig();
+        this.elasticClient = this.elasticConfig.getClient();
     }
     generateUniqueId(): string {
         return Math.random().toString(36).substring(7);
@@ -49,9 +52,8 @@ class LocationAlertService {
 
     async saveLocationAlertToElasticSearch(locationAlert: LocationAlert) {
         try {
-
-            const elasticClient = this.elasticConfig.getClient();
-            const response = await elasticClient.index({
+            // const elasticClient = this.elasticConfig.getClient();
+            const response = await this.elasticClient.index({
                 index: this.indexName,
                 body: locationAlert,
             });
@@ -61,6 +63,23 @@ class LocationAlertService {
             throw error;
         }
     }
+
+    async fetchLocationAlertData() {
+        try {
+          const index = this.indexName; 
+          const query = {
+            query: {
+              match_all: {}
+            }
+          };
+      
+          const body  = await this.elasticClient.search({ index, body: query });
+          return body.hits.hits;
+        } catch (error) {
+          console.error('Error fetching data from Elasticsearch:', error);
+          throw error;
+        }
+      }
 
 
 }
