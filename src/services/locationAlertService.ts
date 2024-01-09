@@ -1,8 +1,14 @@
 
+import ElasticConfig from '../config/elasticConfig';
 import LocationAlert from '../models/locationAlert';
 
 class LocationAlertService {
+    private elasticConfig: ElasticConfig;
 
+    private indexName = 'location-alert';
+    constructor() {
+        this.elasticConfig = new ElasticConfig();
+    }
     generateUniqueId(): string {
         return Math.random().toString(36).substring(7);
     }
@@ -37,9 +43,26 @@ class LocationAlertService {
             latitude: this.generateRandomLatitude(),
             longitude: this.generateRandomLongitude(),
             message: this.generateRandomMessage(),
-            timestamp: new Date()
+            timestamp: new Date().getTime()
         };
     }
+
+    async saveLocationAlertToElasticSearch(locationAlert: LocationAlert) {
+        try {
+
+            const elasticClient = this.elasticConfig.getClient();
+            const response = await elasticClient.index({
+                index: this.indexName,
+                body: locationAlert,
+            });
+            console.log('Data saved to Elasticsearch:', response.result);
+        } catch (error) {
+            console.error('Error saving data to Elasticsearch:', error);
+            throw error;
+        }
+    }
+
+
 }
 
 export default LocationAlertService;

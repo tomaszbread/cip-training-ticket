@@ -1,4 +1,4 @@
-import Redis from "ioredis";
+
 import RedisConfig from "../config/redisConfig";
 import LocationAlert from "../models/locationAlert";
 
@@ -31,7 +31,7 @@ class RedisStreamSubscriber {
     const decodedMessage: any = {} as LocationAlert;
 
     for (let i = 0; i < messageData.length; i += 2) {
-      const key = messageData[i].toString()
+      const key = messageData[i].toString();
       const value = messageData[i + 1].toString();
       if (key === 'latitude' || key === 'longitude') {
         decodedMessage[key] = parseFloat(value);

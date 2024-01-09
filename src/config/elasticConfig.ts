@@ -6,7 +6,7 @@ class ElasticConfig {
   private static _instance: ElasticConfig;
   private client: Client;
 
-  private constructor() {
+  public constructor() {
     this.client = new Client({ node: 'http://localhost:9200' });
   }
 

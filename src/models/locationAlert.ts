@@ -6,7 +6,7 @@ interface LocationAlert {
     latitude: number;
     longitude: number;
     message: string;
-    timestamp: Date;
+    timestamp: number;
 }
 
 export const locationAlertMapping: MappingTypeMapping = {
