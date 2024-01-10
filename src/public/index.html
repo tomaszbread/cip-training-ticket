@@ -1,9 +1,75 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location Alert App</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo:wght@400;500;700&family=Noto+Color+Emoji&family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 20px;
+            background-color: #383838;
+
+        }
+
+        .btn {
+            font-family: 'Exo', sans-serif;
+            font-weight: 600;
+            color: #ffffff;
+
+        }
+    </style>
+</head>
 
 <body>
-    <span>
-        TEST
-    </span>
+
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center">
+                <!-- Your centered button -->
+                <span style="font-family: 'Noto Color Emoji', sans-serif;font-size: 200px;">👀
+
+                </span>
+                <br>
+                <button id="getSingleAlertButton" class="btn btn-secondary">GENERATE LOCATION</button>
+                <br> <br>
+
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const apiUrl = 'http://localhost:3000';
+            function getSingleLocationAlert() {
+                fetch(`${apiUrl}/location-alerts/getLocationAlert`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Single Location Alert:', data);
+                    })
+                    .catch(error => {
+                        console.error('Fetch Error:', error);
+                    });
+            }
+
+            document.getElementById('getSingleAlertButton').addEventListener('click', getSingleLocationAlert);
+        });
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 
 </html>

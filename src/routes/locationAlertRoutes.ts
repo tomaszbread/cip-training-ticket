@@ -1,10 +1,9 @@
 import express from 'express';
 import LocationAlertController from '../controllers/locationAlertController';
 
-const router = express.Router();
+const locationAlertRouter = express.Router();
 const locationAlertController = new LocationAlertController();
 
-router.get('/', locationAlertController.getLocationAlerts);
-router.post('/', locationAlertController.createLocationAlert);
+locationAlertRouter.get('/getLocationAlert', locationAlertController.getLocationAlert);
 
-export default router;
+export default locationAlertRouter;

@@ -7,13 +7,15 @@ import SocketConfig from './config/socketConfig';
 import LocationAlertController from './controllers/locationAlertController';
 import LocationAlertService from './services/locationAlertService';
 import * as path from 'path';
+import { exec } from 'child_process';
+
 
 class App {
   private readonly app: express.Application;
   private readonly port: number = 3000;
 
   private redisConfig: RedisConfig;
-  private socketConfig: SocketConfig
+  private socketConfig: SocketConfig;
   private elasticConfig: ElasticConfig;
 
   private redisStreamSubscriber: RedisStreamSubscriber;
@@ -27,7 +29,7 @@ class App {
 
   constructor() {
     this.app = express();
-    this.socketConfig = new SocketConfig(this.app)
+    this.socketConfig = new SocketConfig(this.app);
     this.redisConfig = new RedisConfig();
     this.redisStreamSubscriber = new RedisStreamSubscriber();
     this.locationAlertController = new LocationAlertController();
@@ -49,18 +51,15 @@ class App {
 
   private configureServer(): void {
     this.app.use(express.json());
-
-
   }
   private configureStaticFiles(): void {
-
     this.app.get('/', (req, res) => {
       const indexPath = path.join(__dirname, '/public/index.html');
       res.sendFile(indexPath);
     });
   }
-  
-  private configureRedis(){
+
+  private configureRedis() {
     this.redisConfig.initConfig();
   }
 
@@ -68,8 +67,10 @@ class App {
     this.app.use('/location-alerts', LocationAlertRoutes);
   }
 
-  private startServer(): void {
+  private async startServer() {
     this.socketConfig.startServer(this.port);
+    const url = `http://localhost:${this.port}`;
+    exec(`start ${url}`);
 
   }
 
@@ -81,7 +82,7 @@ class App {
     }
   }
 
-  private createLocationAlert(){
+  private createLocationAlert() {
     this.locationAlertController.createLocationAlert();
   }
 

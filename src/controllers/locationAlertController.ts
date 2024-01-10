@@ -13,18 +13,9 @@ class LocationAlertController {
     this.redisConfig = new RedisConfig();
   }
 
-  public getLocationAlerts(req: Request, res: Response): void {
-    const alerts: LocationAlert[] = [
-      {
-        id: '1',
-        userId: 'admin',
-        latitude: 40.7128,
-        longitude: -74.0060,
-        message: 'local admin',
-        timestamp: new Date().getTime()
-      } as LocationAlert,
-    ];
-    res.json(alerts);
+  public getLocationAlert(req: Request, res: Response): void {
+    this.createLocationAlert();
+    res.json("STARTING ALERT PROCESS");
   }
 
   public createLocationAlert(): void {
