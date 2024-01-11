@@ -11,7 +11,7 @@ class RedisStreamSubscriber {
   }
 
   public async subscribeToStream(streamKey: string, callback: any) {
-    const result = await this.redis.client.xread('BLOCK', 1000, 'STREAMS', streamKey, '0');
+    const result = await this.redis.client.xread('BLOCK', 0, 'STREAMS', streamKey, 0);
     if (result) {
       const stream = result[0];
       const messages = stream[1];
@@ -27,7 +27,7 @@ class RedisStreamSubscriber {
   }
 
 
-  private decodeMessageData(messageData: string[]): LocationAlert {
+  public decodeMessageData(messageData: string[]): LocationAlert {
     const decodedMessage: any = {} as LocationAlert;
 
     for (let i = 0; i < messageData.length; i += 2) {

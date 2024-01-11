@@ -9,12 +9,18 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Exo:wght@400;500;700&family=Noto+Color+Emoji&family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Exo:wght@400;500;700&family=Noto+Color+Emoji&family=Poppins:wght@400;500&display=swap"
+        rel="stylesheet">
     <style>
         body {
-            margin: 20px;
             background-color: #383838;
-
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .btn {
@@ -40,6 +46,8 @@
                 <button id="getSingleAlertButton" class="btn btn-secondary">GENERATE LOCATION</button>
                 <br> <br>
 
+                <pre><code id="resultsContainer" class="language-html"></code></pre>
+
             </div>
         </div>
     </div>
@@ -48,6 +56,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const apiUrl = 'http://localhost:3000';
+            const socket = io(apiUrl);
             function getSingleLocationAlert() {
                 fetch(`${apiUrl}/location-alerts/getLocationAlert`)
                     .then(response => {
@@ -64,11 +73,23 @@
                     });
             }
 
+            socket.on('new-location-alert', function (data) {
+                console.log('Received data from server:', data);
+                const resultsContainer = document.getElementById('resultsContainer');
+                resultsContainer.innerHTML = JSON.stringify(data)
+            });
+
+            socket.io.on("error", (error) => {
+                // ...
+            });
+
             document.getElementById('getSingleAlertButton').addEventListener('click', getSingleLocationAlert);
         });
     </script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-
+    <script src="https://cdn.socket.io/4.1.3/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 
