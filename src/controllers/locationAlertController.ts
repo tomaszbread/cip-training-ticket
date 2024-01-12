@@ -27,6 +27,7 @@ class LocationAlertController {
   public publishToLocationAlertStream(alert: LocationAlert): void {
     const streamAlert = Object.entries(alert) as any;
     this.redisConfig.client.xadd('location-alert-stream', '*', ...streamAlert);
+
   }
 
 

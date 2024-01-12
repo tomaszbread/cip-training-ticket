@@ -6,25 +6,77 @@ import LocationAlert from "../models/locationAlert";
 class RedisStreamSubscriber {
 
   private redis: RedisConfig;
+  private groupName = "location-alert-group";
+  private consumerName = "location-consumer";
+  private streamKey = "location-alert-stream";
   constructor() {
     this.redis = new RedisConfig();
   }
 
-  public async subscribeToStream(streamKey: string, callback: any) {
-    const result = await this.redis.client.xread('BLOCK', 0, 'STREAMS', streamKey, 0);
-    if (result) {
-      const stream = result[0];
-      const messages = stream[1];
+  public async subscribeToStreamWithGroup(streamKey: string, callback: any) {
+    try {
+      const streamExists = (await this.redis.client.exists(streamKey)) !== 0;
 
-      for (const [messageId, messageData] of messages) {
-        const decodedMessage = this.decodeMessageData(messageData);
+      if (streamExists) {
+        const groupInfo: any = await this.redis.client.xinfo('GROUPS', streamKey);
+        if (!groupInfo.some((info: any) => info[1] === this.groupName)) {
+          await this.redis.client.xgroup('CREATE', streamKey, this.groupName, '$', 'MKSTREAM');
+        } else {
+          await this.redis.client.xgroup('DESTROY', streamKey, this.groupName);
+          await this.redis.client.xgroup('CREATE', streamKey, this.groupName, '$', 'MKSTREAM');
+        }
 
-        console.log(`Received message with ID ${messageId}:`, decodedMessage);
+        const result = await this.redis.client.xreadgroup(
+          'GROUP', this.groupName, this.consumerName,
+          'BLOCK', 1000, 'STREAMS', streamKey, '>');
 
-        callback(decodedMessage);
+        if (result && result.length > 0) {
+          const stream: any = result[0];
+          const messages = stream[1];
+
+          for (const [messageId, messageData] of messages) {
+            const decodedMessage = this.decodeMessageData(messageData);
+
+            console.log(`Received message with ID ${messageId}:`, decodedMessage);
+
+            // Acknowledge the message as processed
+            await this.redis.client.xack(streamKey, this.groupName, messageId);
+
+            callback(decodedMessage);
+          }
+        }
+      } else {
+        console.error('No messages received from the stream.');
       }
+    } catch (error: any) {
+      console.error('Error while reading from the stream:', error.message);
     }
   }
+
+
+  // public async subscribeToStream(streamKey: string, callback: any) {
+  //   try {
+  //     const result = await this.redis.client.xread('BLOCK', 0, 'STREAMS', streamKey, 0);
+
+  //     if (result && result.length > 0) {
+  //       const stream = result[0];
+  //       const messages = stream[1];
+
+  //       for (const [messageId, messageData] of messages) {
+  //         const decodedMessage = this.decodeMessageData(messageData);
+
+  //         console.log(`Received message with ID ${messageId}:`, decodedMessage);
+
+  //         callback(decodedMessage);
+  //       }
+  //     } else {
+  //       console.error('No messages received from the stream.');
+  //     }
+  //   } catch (error: any) {
+  //     console.error('Error while reading from the stream:', error.message);
+
+  //   }
+  // }
 
 
   public decodeMessageData(messageData: string[]): LocationAlert {

@@ -45,8 +45,8 @@ class App {
     this.configureRoutes();
     this.startServer();
     this.initializeElasticSearch();
-   // this.createLocationAlert();
-   this.locationAlertStreamSubscriber();
+    // this.createLocationAlert();
+    this.locationAlertStreamSubscriber();
   }
 
   private configureServer(): void {
@@ -87,7 +87,7 @@ class App {
   }
 
   public async locationAlertStreamSubscriber() {
-    this.redisStreamSubscriber.subscribeToStream(this.streamKey, async (locationAlert: any) => {
+    this.redisStreamSubscriber.subscribeToStreamWithGroup(this.streamKey, async (locationAlert: any) => {
       console.log('received message', locationAlert);
       this.locationAlertService.saveLocationAlertToElasticSearch(locationAlert);
       const updatedData = await this.locationAlertService.fetchLocationAlertData();
@@ -95,7 +95,7 @@ class App {
       this.socketConfig.io.emit('new-location-alert', locationAlert);
     });
 
-}
+  }
 
 }
 
