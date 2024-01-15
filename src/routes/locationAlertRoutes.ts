@@ -1,9 +1,16 @@
+
 import express from 'express';
 import LocationAlertController from '../controllers/locationAlertController';
+import RedisConfig from '../config/redisConfig';
 
 const locationAlertRouter = express.Router();
-const locationAlertController = new LocationAlertController();
 
-locationAlertRouter.get('/getLocationAlert', locationAlertController.getLocationAlert);
+const configureLocationAlertRoutes = (redisConfig: RedisConfig) => {
+  const locationAlertController = new LocationAlertController(redisConfig);
 
-export default locationAlertRouter;
+  locationAlertRouter.get('/getLocationAlert', locationAlertController.getLocationAlert);
+
+  return locationAlertRouter;
+};
+
+export default configureLocationAlertRoutes;

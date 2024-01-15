@@ -8,6 +8,7 @@ import LocationAlertController from './controllers/locationAlertController';
 import LocationAlertService from './services/locationAlertService';
 import * as path from 'path';
 import { exec } from 'child_process';
+import configureLocationAlertRoutes from './routes/locationAlertRoutes';
 
 
 class App {
@@ -31,10 +32,11 @@ class App {
     this.app = express();
     this.socketConfig = new SocketConfig(this.app);
     this.redisConfig = new RedisConfig();
-    this.redisStreamSubscriber = new RedisStreamSubscriber();
-    this.locationAlertController = new LocationAlertController();
+    this.redisStreamSubscriber = new RedisStreamSubscriber(this.redisConfig, this.socketConfig);
+    this.locationAlertController = new LocationAlertController(this.redisConfig);
     this.locationAlertService = new LocationAlertService();
     this.elasticConfig = new ElasticConfig();
+    
     this.onInit();
   }
 
@@ -45,7 +47,6 @@ class App {
     this.configureRoutes();
     this.startServer();
     this.initializeElasticSearch();
-    // this.createLocationAlert();
     this.locationAlertStreamSubscriber();
   }
 
@@ -64,7 +65,8 @@ class App {
   }
 
   private configureRoutes(): void {
-    this.app.use('/location-alerts', LocationAlertRoutes);
+    const locationAlertRouter = configureLocationAlertRoutes(this.redisConfig);
+    this.app.use('/location-alerts', locationAlertRouter);
   }
 
   private async startServer() {
@@ -82,19 +84,9 @@ class App {
     }
   }
 
-  private createLocationAlert() {
-    this.locationAlertController.createLocationAlert();
-  }
 
   public async locationAlertStreamSubscriber() {
-    this.redisStreamSubscriber.subscribeToStreamWithGroup(this.streamKey, async (locationAlert: any) => {
-      console.log('received message', locationAlert);
-      this.locationAlertService.saveLocationAlertToElasticSearch(locationAlert);
-      const updatedData = await this.locationAlertService.fetchLocationAlertData();
-      //console.log(updatedData)
-      this.socketConfig.io.emit('new-location-alert', locationAlert);
-    });
-
+    this.redisStreamSubscriber.subscribeToStream();
   }
 
 }

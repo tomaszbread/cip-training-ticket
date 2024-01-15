@@ -8,10 +8,10 @@ class LocationAlertController {
   private locationAlertService: LocationAlertService;
   private redisConfig: RedisConfig;
 
-  constructor() {
+  constructor(redisConfig: RedisConfig) {
     this.getLocationAlert = this.getLocationAlert.bind(this);
     this.locationAlertService = new LocationAlertService();
-    this.redisConfig = new RedisConfig();
+    this.redisConfig = redisConfig
   }
 
   public getLocationAlert(req: Request, res: Response) {
