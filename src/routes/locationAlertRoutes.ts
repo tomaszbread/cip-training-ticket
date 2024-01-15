@@ -7,9 +7,7 @@ const locationAlertRouter = express.Router();
 
 const configureLocationAlertRoutes = (redisConfig: RedisConfig) => {
   const locationAlertController = new LocationAlertController(redisConfig);
-
   locationAlertRouter.get('/getLocationAlert', locationAlertController.getLocationAlert);
-
   return locationAlertRouter;
 };
 
