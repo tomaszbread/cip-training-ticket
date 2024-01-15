@@ -7,16 +7,16 @@ class LocationAlertController {
 
   private locationAlertService: LocationAlertService;
   private redisConfig: RedisConfig;
-
+  private streamKey = "location-alert-stream";
   constructor(redisConfig: RedisConfig) {
     this.getLocationAlert = this.getLocationAlert.bind(this);
     this.locationAlertService = new LocationAlertService();
-    this.redisConfig = redisConfig
+    this.redisConfig = redisConfig;
   }
 
   public getLocationAlert(req: Request, res: Response) {
     this.createLocationAlert();
-    res.json("STARTING ALERT PROCESS");
+    res.json();
   }
 
   public createLocationAlert(): void {
@@ -26,8 +26,8 @@ class LocationAlertController {
 
   public publishToLocationAlertStream(alert: LocationAlert): void {
     const streamAlert = Object.entries(alert) as any;
-    this.redisConfig.client.xadd('location-alert-stream', '*', ...streamAlert);
-
+    this.redisConfig.client.publish(this.streamKey, JSON.stringify(alert));
+    this.redisConfig.client.xadd(this.streamKey, '*', ...streamAlert);
   }
 
 

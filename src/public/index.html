@@ -5,15 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Location Alert App</title>
-    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=Exo:wght@400;500;700&family=Noto+Color+Emoji&family=Poppins:wght@400;500&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Exo:wght@400;500;700&family=Noto+Color+Emoji&family=Poppins:wght@400;500&display=swap" rel="stylesheet">
     <style>
         body {
             background-color: #383838;
@@ -29,6 +26,23 @@
             color: #ffffff;
 
         }
+
+        #objectList {
+            list-style: none;
+            text-align: start;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .contentWrapper {
+            display: flex;
+            justify-content: center;
+            padding: 50px;
+        }
     </style>
 </head>
 
@@ -38,15 +52,12 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6 text-center">
-                <!-- Your centered button -->
-                <span style="font-family: 'Noto Color Emoji', sans-serif;font-size: 200px;">👀
-
-                </span>
-                <br>
+                <p style="font-family: 'Noto Color Emoji', sans-serif;font-size: 200px;">👀</p>
                 <button id="getSingleAlertButton" class="btn btn-secondary">GENERATE LOCATION</button>
-                <br> <br>
+                <div class="contentWrapper">
+                    <ul id="objectList"></ul>
+                </div>
 
-                <pre><code id="resultsContainer" class="language-html"></code></pre>
 
             </div>
         </div>
@@ -75,13 +86,33 @@
 
             socket.on('new-location-alert', function (data) {
                 console.log('Received data from server:', data);
-                const resultsContainer = document.getElementById('resultsContainer');
-                resultsContainer.innerHTML = JSON.stringify(data)
+                generateList(data);
             });
 
             socket.io.on("error", (error) => {
                 // ...
             });
+
+            function generateList(object) {
+                var listElement = document.getElementById("objectList");
+                listElement.innerHTML = "";
+                for (var key in object) {
+                    if (object.hasOwnProperty(key)) {
+                        var listItem = document.createElement("li");
+                        listItem.innerHTML = "<strong>" + key + ":</strong> " + object[key];
+                        listElement.appendChild(listItem);
+                    }
+                }
+            }
+
+            function getRandomColor() {
+                var letters = '0123456789ABCDEF';
+                var color = '#';
+                for (var i = 0; i < 6; i++) {
+                    color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
+            }
 
             document.getElementById('getSingleAlertButton').addEventListener('click', getSingleLocationAlert);
         });

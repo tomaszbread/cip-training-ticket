@@ -4,8 +4,8 @@ import ElasticConfig from '../config/elasticConfig';
 import LocationAlert from '../models/locationAlert';
 
 class LocationAlertService {
-    private elasticConfig: ElasticConfig
-    public elasticClient: Client
+    private elasticConfig: ElasticConfig;
+    public elasticClient: Client;
     private indexName = 'location-alert';
 
     constructor() {
@@ -35,8 +35,8 @@ class LocationAlertService {
     }
 
     generateRandomMessage(): string {
-        const messages = ['Alert 1', 'Alert 2', 'Alert 3'];
-        return messages[Math.floor(Math.random() * messages.length)];
+        const randomNum = Math.floor(Math.random() * 100);
+        return `Alert ${randomNum}`;
     }
 
     generateRandomLocationAlert(): LocationAlert {
@@ -52,7 +52,6 @@ class LocationAlertService {
 
     async saveLocationAlertToElasticSearch(locationAlert: LocationAlert) {
         try {
-            // const elasticClient = this.elasticConfig.getClient();
             const response = await this.elasticClient.index({
                 index: this.indexName,
                 body: locationAlert,
@@ -66,20 +65,20 @@ class LocationAlertService {
 
     async fetchLocationAlertData() {
         try {
-          const index = this.indexName; 
-          const query = {
-            query: {
-              match_all: {}
-            }
-          };
-      
-          const body  = await this.elasticClient.search({ index, body: query });
-          return body.hits.hits;
+            const index = this.indexName;
+            const query = {
+                query: {
+                    match_all: {}
+                }
+            };
+
+            const body = await this.elasticClient.search({ index, body: query });
+            return body.hits.hits;
         } catch (error) {
-          console.error('Error fetching data from Elasticsearch:', error);
-          throw error;
+            console.error('Error fetching data from Elasticsearch:', error);
+            throw error;
         }
-      }
+    }
 
 
 }

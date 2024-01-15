@@ -22,8 +22,6 @@ class App {
   private redisStreamSubscriber: RedisStreamSubscriber;
   private locationAlertService: LocationAlertService;
   private locationAlertController: LocationAlertController;
-
-  private streamKey = 'location-alert-stream';
   private indexName = 'location-alert';
 
 
@@ -36,7 +34,7 @@ class App {
     this.locationAlertController = new LocationAlertController(this.redisConfig);
     this.locationAlertService = new LocationAlertService();
     this.elasticConfig = new ElasticConfig();
-    
+
     this.onInit();
   }
 
